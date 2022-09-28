@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react";
-
+import { ref, push, child, update } from "firebase/database";
+import { database } from "../firebase";
 const Contact = () => {
   const [user, setUser] = useState({
     name: "",
@@ -12,6 +13,7 @@ const Contact = () => {
 
   let name, value;
   const getUserData = (event) => {
+    console.log(event.target.value);
     // console.log(event.target.value);
     // console.log(event.target.name);
     name = event.target.name;
@@ -20,47 +22,45 @@ const Contact = () => {
   };
 
   const postData = async (e) => {
-    console.log("clicked");
-
+    // console.log("clicked");
     const { name, email, phone, address, message } = user;
     if (name && email && phone && address && message) {
-      const res = await fetch(
-        "https://contactform-5dd19-default-rtdb.firebaseio.com/contactformdb.json",
-        // "https://fir-d0112-default-rtdb.firebaseio.com/demo",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name,
-            email,
-            phone,
-            address,
-            message,
-          }),
-        }
-      );
-        console.log(res);
-        if (res) {
-          setUser(
-            {
-            name: "",
-            email: "",
-            phone: "",
-            address: "",
-            message: "",
-          
-          }
-          )
-  
-        alert("Data Stored In Firebase !")
-        }
+      // now save data in firebase
+      const newPostKey = push(child(ref(database), "forms")).key;
+      const formInfo = {};
+
+      formInfo["/" + newPostKey] = user;
+      update(ref(database), formInfo);
+      // const res = await fetch(
+      //   "https://contactform-5dd19-default-rtdb.firebaseio.com/contactformdb.json",
+      //   // "https://fir-d0112-default-rtdb.firebaseio.com/demo", here demo is collection name .json added neccessary
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify({
+      //       name,
+      //       email,
+      //       phone,
+      //       address,
+      //       message,
+      //     }),
+      //   }
+      // );
+      console.log(formInfo);
+      setUser({
+        name: "",
+        email: "",
+        phone: "",
+        address: "",
+        message: "",
+      });
+
+      alert("Data Stored In Firebase !");
     } else {
-      alert("Please fill all the Data properly")
+      alert("Please fill all the Data properly");
     }
-    
-   
   };
   return (
     <>
@@ -156,4 +156,4 @@ const Contact = () => {
 };
 
 export default Contact;
-// just check 
+// just check
